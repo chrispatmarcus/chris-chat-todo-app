@@ -42,6 +42,7 @@ const Login = () => {
   ) => {
     func(data, setLoading, reset, goTo, dispatch);
   };
+  // this is just a comment
   //  resets all the variables after login
   const reset = () => {
     setEmail("");
@@ -93,7 +94,7 @@ const Login = () => {
             <Button
               onClick={() => setLogin(true)}
               text="Login"
-             loading ={signUpLoading}
+              loading={signUpLoading}
               secondary
             />
           </>
