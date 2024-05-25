@@ -1,0 +1,20 @@
+// import React from "react";
+// type Props = {};
+
+// function chrisDefault({}: Props) {
+//   return <div>Layout</div>;
+// }
+  
+
+
+
+
+
+// export default chrisDefault;
+// 
+// import react from "react";
+// const Chatpage = () => {
+//   return <div></div>;
+// };
+
+// export default Chatpage;
