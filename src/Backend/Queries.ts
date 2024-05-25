@@ -24,6 +24,8 @@ import {
   doc,
   getDoc,
   getDocs,
+  onSnapshot,
+  orderBy,
   query,
   serverTimestamp,
   setDoc,
@@ -31,7 +33,12 @@ import {
   where,
 } from "firebase/firestore";
 import { debug } from "util";
-import { defaultUser, setUser, userStorageName } from "../Redux/userSlice";
+import {
+  defaultUser,
+  setUser,
+  setUsers,
+  userStorageName,
+} from "../Redux/userSlice";
 import { AppDispatch } from "../Redux/store";
 import convertTime from "../utills/convertTime";
 import AvatarGenerator from "../utills/avatarGenerator";
@@ -144,7 +151,7 @@ export const BE_signOut = async (
 // save user profile
 export const BE_saveProfile = async (
   dispatch: AppDispatch,
-  data: { email: string; username: string; password: string; img: string },
+  data: { email: string; username: string; password: string; img: string }
   // setLoading: setLoadingTypes
 ) => {
   // setLoading(true);
@@ -175,6 +182,40 @@ export const BE_saveProfile = async (
     dispatch(setUser(userInfo));
     // setLoading(false);
   } else toastErr("BE_saveProfile: id not found");
+};
+
+//get all users for userchat
+export const BE_getAllUsers = async (
+  dispatch: AppDispatch,
+  setLoading: setLoadingTypes
+) => {
+  setLoading(true);
+  // get all users except the current signin one, those online should be ontop
+  const q = query(collection(db, userscoll), orderBy("isOnline", "desc"));
+  onSnapshot(q, (usersSnapshot) => {
+    let users: userType[] = [];
+    usersSnapshot.forEach((user) => {
+      const { img, isOnline, username, email, bio, creationTime, lastSeen } =
+        user.data();
+      users.push({
+        id: user.id,
+        img,
+        isOnline,
+        username,
+        email,
+        bio,
+        creationTime: convertTime(creationTime.toDate()),
+        lastSeen: convertTime(lastSeen.toDate()),
+      });
+    });
+    // take out the current user 
+    const id = getStorageUser().id;
+    if (id) {
+      // it selects all the sign in users except u(the current user)
+      dispatch(setUsers(users.filter((u) => u.id != id)));
+    }
+    setLoading(false);
+  });
 };
 
 // add user to collection
@@ -462,3 +503,5 @@ export const getTasksForTaskList = async (
   dispatch(setTaskListTasks({ listid, tasks }));
   setLoading(false);
 };
+
+//.......................................for

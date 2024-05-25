@@ -1,10 +1,20 @@
 import react from "react";
-const Chatpage = () => {
+import SidebarLeft from "../Components/SidebarLeft";
+const nochat = require("");
+
+function Chatpage() {
   return (
-    <div>
-      <h1>chatpage</h1>
+    <div className="h-full max-w-[1500px] flex justify-between m-auto p-3">
+      <SidebarLeft />
+      <div className="hidden lg:block flex-[0.7] bg-white rounded-3xl shadow-md overflow-hidden">
+        <img
+          src={nochat}
+          alt="no chat"
+          className="w-full h-full object-contian"
+        />
+      </div>
     </div>
   );
-};
+}
 
 export default Chatpage;
