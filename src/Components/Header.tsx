@@ -90,7 +90,7 @@ function Header() {
         )}
 
         <div className="group">
-          <UserHeaderProfile user={currentUser} />
+          <UserHeaderProfile user={currentUser} lastmsg="true" loading/>
           <div className="absolute pt-5 hidden group-hover:block w-full min-w-max">
             <ul className="w-full bg-white overflow-hidden rounded-md shadow-md text-gray-700 pt-1">
               <p

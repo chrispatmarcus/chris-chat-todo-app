@@ -40,7 +40,7 @@ function UserHeaderProfile({ user, handleClick, otherUser, lastmsg, loading }: P
       </div>
     </div>
   ) :(
-    //call userloader
+    //call userloader 
     <Userloader />
   )
 }
