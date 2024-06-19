@@ -21,24 +21,25 @@ function Header() {
   const usr = getStorageUser();
 
   // useeffect that help prevents user from going to dashboard if it does not exist or has not log in
-  // useEffect(() => {
-  //   if (usr?.id) {
-  //     dispatch(setUser(usr));
-  //   } else {
-  //     goTo("/auth");
-  //   }
-  // }, [dispatch,goto]);
+  useEffect(() => {
+    if (usr?.id) {
+      dispatch(setUser(usr));
+    } else {
+      goTo("/auth");
+    }
+  }, []);
 
   // // useeffect that allows user to remian in current page  even after refreshing
-  // useEffect(() => {
-  //   const page = getCurrentPage();
-  //   if (page) goTo("/dashboard/" + page);
-  // }, [goTo]);
+  useEffect(() => {
+    const page = getCurrentPage();
+    if (page) goTo("/dashboard/" + page);
+  }, [goTo]);
 
   const HandleGoPage = (page: string) => {
     goTo("/dashboard/" + page);
     setCurrentPage(page);
   };
+
   const HandleSignout = async () => {
     await BE_signOut(dispatch, goTo);
   };
@@ -90,7 +91,7 @@ function Header() {
         )}
 
         <div className="group">
-          <UserHeaderProfile user={currentUser} lastmsg="true" loading/>
+          <UserHeaderProfile user={currentUser} lastmsg="true"  />
           <div className="absolute pt-5 hidden group-hover:block w-full min-w-max">
             <ul className="w-full bg-white overflow-hidden rounded-md shadow-md text-gray-700 pt-1">
               <p

@@ -19,12 +19,12 @@ const Login = () => {
   const usr = getStorageUser();
 
   // // prevents the user from login in again when inside the dashboard even when you refresh page
-  // useEffect(() => {
-  //   if (usr?.id) {
-  //     dispatch(setUser(usr));
-  //     goTo("/dashboard");
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (usr?.id) {
+      dispatch(setUser(usr));
+      goTo("/dashboard");
+    }
+  }, []);
 
   const handleSignup = () => {
     const data = { email, password, confirmPassword };

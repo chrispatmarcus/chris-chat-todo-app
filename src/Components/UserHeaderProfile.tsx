@@ -6,10 +6,16 @@ type Props = {
   user: userType;
   handleClick?: () => void;
   otherUser?: boolean;
-  lastmsg: string;
-  loading:boolean;
+  lastmsg?: string;
+  loading?: boolean;
 };
-function UserHeaderProfile({ user, handleClick, otherUser, lastmsg, loading }: Props) {
+function UserHeaderProfile({
+  user,
+  handleClick,
+  otherUser,
+  lastmsg,
+  loading,
+}: Props) {
   return !loading && user ? (
     <div
       onClick={handleClick}
@@ -39,10 +45,10 @@ function UserHeaderProfile({ user, handleClick, otherUser, lastmsg, loading }: P
         </div>
       </div>
     </div>
-  ) :(
-    //call userloader 
+  ) : (
+    //call userloader
     <Userloader />
-  )
+  );
 }
 
 export default UserHeaderProfile;

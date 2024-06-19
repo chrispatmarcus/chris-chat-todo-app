@@ -17,7 +17,7 @@ module.exports = {
       },
       backgroundImage: (theme) => ({
         //backgroup image to be use for all the pages
-        pattern: "url('')",
+        pattern: "url('https://images.pexels.com/photos/1029624/pexels-photo-1029624.jpeg?auto=compress&cs=tinysrgb&w=400')",
       }),
     },
   },

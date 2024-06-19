@@ -208,8 +208,9 @@ export const BE_getAllUsers = async (
         lastSeen: convertTime(lastSeen.toDate()),
       });
     });
-    // take out the current user 
+    // take out the current user
     const id = getStorageUser().id;
+    console.log(id)
     if (id) {
       // it selects all the sign in users except u(the current user)
       dispatch(setUsers(users.filter((u) => u.id != id)));
