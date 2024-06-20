@@ -13,8 +13,12 @@ export const defaultUser: userType = {
   lastSeen: "",
   bio: "",
 };
+type userStateType = {
+  users: userType[];
+  currenUser: userType;
+};
 
-const initialState = {
+const initialState: userStateType = {
   users: [],
   currenUser: defaultUser,
 };

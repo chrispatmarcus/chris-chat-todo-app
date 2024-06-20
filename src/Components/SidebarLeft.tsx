@@ -21,7 +21,7 @@ function SidebarLeft({}: Props) {
     get();
   }, []);
   return (
-    <Sidebar className={`flex-[0.8] w-[80%] h-[80%] md:h-full md:w-full `}>
+    <Sidebar className={`flex-[0.5] absolute md:relative z-10 md:z-0  w-[80%] h-[80%] md:h-full md:w-full `}>
       <div className="flex flex-col">
         <div className="flex sticky top-0 z-10">
           <p
