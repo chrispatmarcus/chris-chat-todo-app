@@ -1,6 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import Header from "../Components/Header";
+import Alert from "../Components/Alert";
 type Props = {};
 
 function Layout({}: Props) {
@@ -10,6 +11,7 @@ function Layout({}: Props) {
       <div className="bg-pattern  h-[500px] overflow-y-scroll">
         <Outlet />
       </div>
+      <Alert />
     </div>
   );
 }

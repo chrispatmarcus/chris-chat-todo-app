@@ -7,7 +7,7 @@ import UserHeaderProfile from "./UserHeaderProfile";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import { Link, useNavigate } from "react-router-dom";
-import { BE_signOut, getStorageUser } from "../Backend/Queries";
+import { BE_getChats, BE_signOut, getStorageUser } from "../Backend/Queries";
 import { setUser } from "../Redux/userSlice";
 const logo = require("../Assets/amazon-mobile-logo.png");
 type Props = {};
@@ -20,20 +20,28 @@ function Header() {
   const currentUser = useSelector((state: RootState) => state.user.currenUser);
   const usr = getStorageUser();
 
-  // useeffect that help prevents user from going to dashboard if it does not exist or has not log in
-  useEffect(() => {
-    if (usr?.id) {
-      dispatch(setUser(usr));
-    } else {
-      goTo("/auth");
-    }
-  }, []);
+  // // useeffect that help prevents user from going to dashboard if it does not exist or has not log in
+  // useEffect(() => {
+  //   if (usr?.id) {
+  //     dispatch(setUser(usr));
+  //   } else {
+  //     goTo("/auth");
+  //   }
+  // }, []);
 
   // // useeffect that allows user to remian in current page  even after refreshing
+  // useEffect(() => {
+  //   const page = getCurrentPage();
+  //   if (page) goTo("/dashboard/" + page);
+
+  // }, [goTo]);
+
   useEffect(() => {
-    const page = getCurrentPage();
-    if (page) goTo("/dashboard/" + page);
-  }, [goTo]);
+    const get = async () => {
+      await BE_getChats(dispatch);
+    };
+    get();
+  });
 
   const HandleGoPage = (page: string) => {
     goTo("/dashboard/" + page);
@@ -91,7 +99,7 @@ function Header() {
         )}
 
         <div className="group">
-          <UserHeaderProfile user={currentUser} lastmsg="true"  />
+          <UserHeaderProfile user={currentUser} lastmsg="true" />
           <div className="absolute pt-5 hidden group-hover:block w-full min-w-max">
             <ul className="w-full bg-white overflow-hidden rounded-md shadow-md text-gray-700 pt-1">
               <p

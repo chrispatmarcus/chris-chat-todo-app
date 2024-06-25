@@ -16,11 +16,21 @@ export const defaultUser: userType = {
 type userStateType = {
   users: userType[];
   currenUser: userType;
+  alertProps: {
+    open:boolean
+    recieverId: string;
+    recieverName: string;
+  };
 };
 
 const initialState: userStateType = {
   users: [],
   currenUser: defaultUser,
+  alertProps: {
+    open:false,
+    recieverId: "",
+    recieverName: "",
+  },
 };
 
 const userSlice = createSlice({
@@ -39,7 +49,16 @@ const userSlice = createSlice({
       // set all users
       state.users = action.payload;
     },
+    setAlertProps: (state, action) => {
+      const {open, recieverId, recieverName} = action.payload
+
+      state.alertProps = {
+        open,
+        recieverId,
+        recieverName
+      }
+    },
   },
 });
-export const { setUser, setUsers } = userSlice.actions;
+export const { setUser, setUsers, setAlertProps } = userSlice.actions;
 export default userSlice.reducer;

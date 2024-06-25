@@ -25,6 +25,7 @@ const AddListBoard = () => {
         onClick={handleAddTaskList}
         className="block md:hidden "
         loading={addLoading}
+        reduceOpacityOnHover= {false}
       />
     </>
   );

@@ -12,6 +12,8 @@ import catchErr from "../utills/catchErr";
 import {
   TaskType,
   authDataType,
+  chatType,
+  messageTypes,
   setLoadingTypes,
   taskListType,
   userType,
@@ -19,12 +21,14 @@ import {
 import { NavigateFunction } from "react-router-dom";
 import {
   addDoc,
+  and,
   collection,
   deleteDoc,
   doc,
   getDoc,
   getDocs,
   onSnapshot,
+  or,
   orderBy,
   query,
   serverTimestamp,
@@ -35,6 +39,7 @@ import {
 import { debug } from "util";
 import {
   defaultUser,
+  setAlertProps,
   setUser,
   setUsers,
   userStorageName,
@@ -54,6 +59,7 @@ import {
   setTaskListTasks,
 } from "../Redux/taskListSlice";
 import TaskCompo from "../Components/TaskCompo";
+import { setChats } from "../Redux/chatsSlice";
 //collection  name
 const userscoll = "users";
 const tasksColl = "tasks";
@@ -210,7 +216,7 @@ export const BE_getAllUsers = async (
     });
     // take out the current user
     const id = getStorageUser().id;
-    console.log(id)
+    console.log(id);
     if (id) {
       // it selects all the sign in users except u(the current user)
       dispatch(setUsers(users.filter((u) => u.id != id)));
@@ -240,13 +246,20 @@ const addUserToCollection = async (
   return getUserInfo(id);
 };
 // function to get user information
-const getUserInfo = async (id: string): Promise<userType> => {
+export const getUserInfo = async (
+  id: string,
+  setloading?: setLoadingTypes
+): Promise<userType> => {
+  if (setloading) setloading(true);
   const userRef = doc(db, userscoll, id);
   const user = await getDoc(userRef);
 
   if (user.exists()) {
     const { img, isOnline, username, email, bio, creationTime, lastSeen } =
       user.data();
+
+    if (setloading) setloading(false);
+
     return {
       id: user.id,
       img,
@@ -263,6 +276,7 @@ const getUserInfo = async (id: string): Promise<userType> => {
     };
   } else {
     toastErr("getUserInfo: user not found");
+    if (setloading) setloading(false);
     return defaultUser;
   }
 };
@@ -301,7 +315,7 @@ export const getStorageUser = () => {
   else return null;
 };
 
-// .....................querries for tasks....................................
+// .....................querries for tasklist....................................
 
 // add a single tasklist
 export const BE_addTaskList = async (
@@ -369,6 +383,7 @@ export const BE_deleteTaskList = async (
     for (let i = 0; i < TaskCompo.length; i++) {
       const { id } = tasks[i];
       //delete eact of the task subcollection
+      // console.log("something", id)
       if (id) BE_deleteTask(listId, id, dispatch);
     }
   }
@@ -445,7 +460,7 @@ export const BE_addTask = async (
       title,
       description,
     };
-    // add in redux store
+    // add in redux store state and then dispatches the current state to the user
     dispatch(addTask({ listid, newTask }));
     setLoading(false);
   } else {
@@ -505,4 +520,98 @@ export const getTasksForTaskList = async (
   setLoading(false);
 };
 
-//.......................................for
+//.......................................for chats ......................................................
+
+// start a chat
+export const BE_startChat = async (
+  dispatch: AppDispatch,
+  // rid is the reciever id which is known as id of the other user your chatting with
+  rId: string,
+  rName: string,
+  setLoading: setLoadingTypes
+) => {
+  // sId is the current user id which is know as the senderID
+  const sId = getStorageUser().id;
+  //check if chat document exist first within the chat collection
+  const q = query(
+    collection(db, chatsColl),
+    or(
+      // checks if you started the chat
+      and(where("senderId", "==", sId), where("recieverId", "==", rId)),
+      // check if the other user started the chat
+      and(where("senderId", "==", rId), where("recieverId", "==", sId))
+    )
+  );
+  const res = await getDocs(q);
+
+  // if you find no chat document with this two ids then create one
+  if (res.empty) {
+    const newChat = await addDoc(collection(db, chatsColl), {
+      senderId: sId,
+      recieverId: rId,
+      lastMsg: "",
+      updatedAt: serverTimestamp(),
+      senderToRecieverNewMsgCount: 0,
+      recieverToSenderNewMsgCount: 0,
+    });
+    const newChatSnapshot = await getDoc(doc(db, newChat.path));
+    // this test condition is for developers
+    if (!newChatSnapshot.exists()) {
+      toastErr("BE_startChat: no such document");
+    }
+    setLoading(false);
+    dispatch(setAlertProps({ open: false }));
+  } else {
+    toastErr("you already started chatting with " + rName);
+    setLoading(false);
+    dispatch(setAlertProps({ open: false }));
+  }
+};
+
+// get users chat
+export const BE_getChats = async (dispatch: AppDispatch) => {
+  const id = getStorageUser().id;
+
+  const q = query(
+    collection(db, chatsColl),
+    or(where("senderId", "==", id), where("recieverId", "==", id)),
+    orderBy("updatedAt", "desc")
+  );
+
+  onSnapshot(q, (chatSnapshot) => {
+    const chats: chatType[] = [];
+    chatSnapshot.forEach((chat) => {
+      const {
+        senderId,
+        recieverId,
+        lastMsg,
+        updatedAt,
+        recieverToSenderNewMsgCount,
+        senderToRecieverNewMsgCount,
+      } = chat.data();
+
+      chats.push({
+        id: chat.id,
+        senderId,
+        recieverId,
+        lastMsg,
+        updatedAt,
+        recieverToSenderNewMsgCount,
+        senderToRecieverNewMsgCount,
+      });
+    });
+    console.log("Chats", chats);
+
+    dispatch(setChats(chats));
+  });
+};
+
+// get users messages
+export const BE_getMsgs = async (dispatch: AppDispatch) => {};
+// send users messages
+export const BE_sendMsgs = async (dispatch: AppDispatch, data:messageTypes, setLoading:setLoadingTypes) => {};
+// function to check if i create a chat
+export const iCreatedChat = (senderId: string) => {
+  const myId = getStorageUser().id;
+  return myId === senderId;
+};
