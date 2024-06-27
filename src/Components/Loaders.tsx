@@ -46,3 +46,29 @@ export const Userloader = () => {
     </div>
   );
 };
+
+// loader for chat messages
+export const MessagesLoader = () => {
+  return (
+    <div className="flex-1 overflow-scroll">
+      {[1, 2, 3, 4, 5, 6].map((m) => (
+        <SingleMessageLoader key={m} />
+      ))}
+    </div>
+  );
+};
+
+const SingleMessageLoader = () => {
+  return (
+    <div className="animate-pulse flex flex-col gap-18">
+      <div
+        className="bg-gray-200 h-12 w-full rounded-t-full rounded-br-full  border-2 border-white
+      self-start max-w-sm"
+      ></div>
+      <div
+        className="bg-gray-300 h-12 w-full mb-5 rounded-t-full rounded-bl-full border-2 border-white
+        self-end max-w-sm"
+      ></div>
+    </div>
+  );
+};

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Icon from "./icons";
 import {
   BsFillSendFill,
@@ -11,32 +11,84 @@ import Input from "./Input";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../Redux/store";
 import { setRightSidebarOpen } from "../Redux/chatsSlice";
-type Props = {};
+import { BE_getMsgs, BE_sendMsgs, getStorageUser } from "../Backend/Queries";
+import { MessagesLoader } from "./Loaders";
+import FlipMove from "react-flip-move";
+import { toastErr, toastInfo } from "../utills/toast";
 
-function ChatArea({}: Props) {
+function ChatArea() {
+  const buttomContainerRef = useRef<HTMLDivElement>(null);
   const [msg, setMsg] = useState("");
-   const dispatch = useDispatch<AppDispatch>();
+  const [getMsgLoading, setgetMsgLoading] = useState(false);
+  const [createMsgLoading, setCreateMsgLoading] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
   // use for the currenselted username in the input field
   const currentSelectedChat = useSelector(
     (state: RootState) => state.chat.currentSelectedChat
   );
+  const messages = useSelector(
+    (state: RootState) => state.chat.currentMessages
+  );
+  const chatId = currentSelectedChat.chatId;
+  useEffect(() => {
+    const get = async () => {
+      if (chatId) await BE_getMsgs(dispatch, chatId, setgetMsgLoading);
+    };
+    get();
+  }, [currentSelectedChat.id]);
+
+  const handleSendMsg = async () => {
+    if (msg.trim()) {
+      const data = {
+        senderId: getStorageUser().id,
+        content: msg,
+      };
+      setMsg("");
+      if (chatId) await BE_sendMsgs(chatId, data, setCreateMsgLoading);
+      if (buttomContainerRef)
+        buttomContainerRef.current?.scrollIntoView({ behavior: "smooth" });
+    } else toastInfo("Enter some  text messages");
+  };
+  const checkEnter = (e: any) => {
+    if (e.key === "Enter") handleSendMsg();
+  };
+
   return (
     <div className="flex-1 lg:flex-[0.4] max-h-full flex flex-col px-2 md:px-5 gap-2 ">
-      <div className="flex-1 border-2 border-black flex flex-col max-h-screen overflow-y-scroll shadow-inner gap-2 ">
-        <div
-          className="bg-gradient-to-r from-myBlue to-myPink text-white text-xs self-end max-w-md shadow-md
+      {getMsgLoading ? (
+        <MessagesLoader />
+      ) : (
+        <div className="flex-1 border-2 border-black flex flex-col max-h-screen overflow-y-scroll shadow-inner gap-2 ">
+          <FlipMove className="flex-1 flex flex-col gap-5">
+            {messages.map((msg) => {
+              const myId = getStorageUser().id;
+              //if it was the user that sent it
+              if (msg.senderId === myId) {
+                return (
+                  <div
+                    className="bg-gradient-to-r from-myBlue to-myPink text-white text-xs self-end max-w-md shadow-md
         py-3 px-3 rounded-t-full rounded-bl-full border-2 border-white"
-        >
-          my message
-        </div>
-
-        <div
-          className="bg-gray-300   text-black text-xs self-start  max-w-md shadow-md
+                  >
+                    {msg.content}
+                  </div>
+                );
+              } else
+                return (
+                  <div
+                    className="bg-gray-300   text-black text-xs self-start  max-w-md shadow-md
         py-3 px-3 rounded-t-full rounded-br-full border-2 border-white"
-        >
-          your message
+                  >
+                    {msg.content}
+                  </div>
+                );
+            })}
+          </FlipMove>
+          <div
+            ref={buttomContainerRef}
+            className="pb-36 flex "
+          ></div>
         </div>
-      </div>
+      )}
 
       <div className="flex gap-1 md:gap-5">
         <div
@@ -54,6 +106,8 @@ function ChatArea({}: Props) {
             value={msg}
             onChange={(e) => setMsg(e.target.value)}
             name={` message to ${currentSelectedChat?.username}`}
+            onKeyDowm={checkEnter}
+            disabled={createMsgLoading}
             className="border-none outline-none text-sm  md:text-[15px]"
           />
           <Icon
@@ -66,7 +120,12 @@ function ChatArea({}: Props) {
           />
         </div>
         <div className="flex items-center justify-center">
-          <Icon IconName={BsFillSendFill} reduceOpacityOnHover={false} />
+          <Icon
+            onClick={handleSendMsg}
+            IconName={BsFillSendFill}
+            reduceOpacityOnHover={false}
+            loading={createMsgLoading}
+          />
         </div>
       </div>
     </div>

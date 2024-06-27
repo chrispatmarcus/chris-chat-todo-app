@@ -59,7 +59,7 @@ import {
   setTaskListTasks,
 } from "../Redux/taskListSlice";
 import TaskCompo from "../Components/TaskCompo";
-import { setChats } from "../Redux/chatsSlice";
+import { setChats, setCurrentMessages } from "../Redux/chatsSlice";
 //collection  name
 const userscoll = "users";
 const tasksColl = "tasks";
@@ -210,8 +210,13 @@ export const BE_getAllUsers = async (
         username,
         email,
         bio,
-        creationTime: convertTime(creationTime.toDate()),
-        lastSeen: convertTime(lastSeen.toDate()),
+        // updated this two lines at vidoe 71
+        creationTime: creationTime
+          ? convertTime(creationTime.toDate())
+          : "no date yet: all users creation time",
+        lastSeen: lastSeen
+          ? convertTime(lastSeen.toDate())
+          : "no date yet: all users lastSeen",
       });
     });
     // take out the current user
@@ -607,21 +612,51 @@ export const BE_getChats = async (dispatch: AppDispatch) => {
 };
 
 // get users messages
-export const BE_getMsgs = async (dispatch: AppDispatch) => {};
+export const BE_getMsgs = async (
+  dispatch: AppDispatch,
+  chatId: string,
+  setLoading: setLoadingTypes
+) => {
+  setLoading(true);
+  const q = query(
+    collection(db, chatsColl, chatId, messagesColl),
+    orderBy("createdAt", "asc")
+  );
+  onSnapshot(q, (messagesSnapshot) => {
+    let msgs: messageTypes[] = [];
+    messagesSnapshot.forEach((msg) => {
+      const { senderId, content, createdAt } = msg.data();
+      msgs.push({
+        id: msg.id,
+        senderId,
+        content,
+        createdAt: createdAt
+          ? convertTime(createdAt.toDate())
+          : "no date yet: all messages",
+      });
+    });
+    dispatch(setCurrentMessages(msgs));
+    setLoading(false);
+  });
+};
 // send users messages
-export const BE_sendMsgs = async (chatId:string, data:messageTypes, setLoading:setLoadingTypes) => {
-  setLoading(false)
-  const res = await addDoc(collection(db, chatsColl, chatId, messagesColl),{
+export const BE_sendMsgs = async (
+  chatId: string,
+  data: messageTypes,
+  setLoading: setLoadingTypes
+) => {
+  setLoading(false);
+  const res = await addDoc(collection(db, chatsColl, chatId, messagesColl), {
     ...data,
-    createdAt:serverTimestamp()
-  })
-  const newMsg = await getDoc(doc(db, res.path))
-  if(newMsg.exists()){
-    setLoading(false)
+    createdAt: serverTimestamp(),
+  });
+  const newMsg = await getDoc(doc(db, res.path));
+  if (newMsg.exists()) {
+    setLoading(false);
     // reset new message count
-    await updateNewMsgCount(chatId, true)
-    await updateLastMsg(chatId, newMsg.data().content)
-    await updateUserInfo({}) // update last seen
+    await updateNewMsgCount(chatId, true);
+    await updateLastMsg(chatId, newMsg.data().content);
+    await updateUserInfo({}); // update last seen
   }
 };
 // function to check if i create a chat
@@ -631,33 +666,34 @@ export const iCreatedChat = (senderId: string) => {
 };
 
 // update new message count for user when he has viewed the message
-export const updateNewMsgCount = async (chatId:string, reset?:boolean) => {
-  const chat = await getDoc(doc(db, chatsColl, chatId))
+export const updateNewMsgCount = async (chatId: string, reset?: boolean) => {
+  const chat = await getDoc(doc(db, chatsColl, chatId));
 
-  let senderToRecieverNewMsgCount = chat.data()?.senderToRecieverNewMsgCount
-  let recieverToSenderNewMsgCount = chat.data()?.recieverToSenderNewMsgCount
+  let senderToRecieverNewMsgCount = chat.data()?.senderToRecieverNewMsgCount;
+  let recieverToSenderNewMsgCount = chat.data()?.recieverToSenderNewMsgCount;
   // update the counts based on the user
-  if(iCreatedChat(chat.data()?.senderId)){ // if its was the user who created the chat ie senderId
-    if(reset) recieverToSenderNewMsgCount = 0;
-    else senderToRecieverNewMsgCount ++
+  if (iCreatedChat(chat.data()?.senderId)) {
+    // if its was the user who created the chat ie senderId
+    if (reset) recieverToSenderNewMsgCount = 0;
+    else senderToRecieverNewMsgCount++;
   } else {
-    if(reset) senderToRecieverNewMsgCount = 0;
-    else recieverToSenderNewMsgCount++
+    if (reset) senderToRecieverNewMsgCount = 0;
+    else recieverToSenderNewMsgCount++;
   }
-  await updateDoc(doc(db,chatsColl, chatId),{
-    updatedAt:serverTimestamp(),
+  await updateDoc(doc(db, chatsColl, chatId), {
+    updatedAt: serverTimestamp(),
     senderToRecieverNewMsgCount,
-    recieverToSenderNewMsgCount  
-  })
-}
+    recieverToSenderNewMsgCount,
+  });
+};
 
 // update last message
-const updateLastMsg = async(chatId:string, lastMsg:string) => {
-  await updateNewMsgCount(chatId)
+const updateLastMsg = async (chatId: string, lastMsg: string) => {
+  await updateNewMsgCount(chatId);
   // await message count here
 
   await updateDoc(doc(db, chatsColl, chatId), {
     lastMsg,
-    updatedAt: serverTimestamp()
-  })
-}
+    updatedAt: serverTimestamp(),
+  });
+};

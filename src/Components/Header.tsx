@@ -18,6 +18,10 @@ function Header() {
   const dispatch = useDispatch();
   // useselector to select state variables
   const currentUser = useSelector((state: RootState) => state.user.currenUser);
+    const hasNewMessage= useSelector(
+      (state: RootState) => state.chat.hasNewMessage
+    );
+
   const usr = getStorageUser();
 
   // // useeffect that help prevents user from going to dashboard if it does not exist or has not log in
@@ -81,7 +85,7 @@ function Header() {
             <Icon IconName={FiList} onClick={() => HandleGoPage("list")} />
             <Icon
               IconName={BsFillChatFill}
-              ping={true}
+              ping={hasNewMessage}
               onClick={() => HandleGoPage("chat")}
               reduceOpacityOnHover={false}
             />
@@ -91,7 +95,7 @@ function Header() {
             <AddListBoard />
             <Icon
               IconName={BsFillChatFill}
-              ping={true}
+              ping={hasNewMessage}
               onClick={() => HandleGoPage("chat")}
               reduceOpacityOnHover={false}
             />
