@@ -126,6 +126,7 @@ const taskListSlice = createSlice({
     },
     saveTask: (state, action) => {
       const { listId, id, title, description } = action.payload;
+      console.log("see it" + title);
       const updatedTaskList = state.currentTaskList.map((tl) => {
         if (tl.id === listId) {
           const updatedTask = tl.tasks?.map((t) => {
@@ -141,9 +142,10 @@ const taskListSlice = createSlice({
       state.currentTaskList = updatedTaskList;
     },
     setTaskListTasks: (state, action) => {
-      const { listId, tasks } = action.payload;
+      const { listid, tasks } = action.payload;
+      console.log(listid);
       const taskList = state.currentTaskList.map((tl) => {
-        if (tl.id === listId) {
+        if (tl.id === listid) {
           tl.tasks = tasks;
         }
         return tl;

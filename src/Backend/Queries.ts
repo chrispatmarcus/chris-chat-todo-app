@@ -53,6 +53,7 @@ import {
   defaultTask,
   defaultTaskList,
   deleteTask,
+  deleteTaskList,
   saveTask,
   saveTaskListTitle,
   setTaskList,
@@ -355,10 +356,10 @@ export const BE_getTaskList = async (
   setloading(true);
   // get user task list
   const tasklist = await getAllTaskList();
-
   dispatch(setTaskList(tasklist)); //Dispatch a redux action
   setloading(false);
 };
+
 export const BE_saveTaskList = async (
   dispatch: AppDispatch,
   setloading: setLoadingTypes,
@@ -374,6 +375,7 @@ export const BE_saveTaskList = async (
   dispatch(
     saveTaskListTitle({ id: updatedTaskList.id, ...updatedTaskList.data() })
   );
+  
 };
 
 export const BE_deleteTaskList = async (
@@ -387,20 +389,19 @@ export const BE_deleteTaskList = async (
   if (TaskCompo.length > 0) {
     for (let i = 0; i < TaskCompo.length; i++) {
       const { id } = tasks[i];
-      //delete eact of the task subcollection
-      // console.log("something", id)
       if (id) BE_deleteTask(listId, id, dispatch);
     }
   }
-  // delete taskList board or you say task list document
+  // delete taskList board
   const listRef = doc(db, taskListColl, listId);
-  await deleteDoc(listRef);
+
+  await deleteDoc(listRef); // first delete the doc found in the collection
 
   const deletedTaskList = await getDoc(listRef);
   if (!deletedTaskList.exists()) {
     setloading(false);
     //updating the state
-    dispatch(deleteTask(listId));
+    dispatch(deleteTaskList(listId));
   }
 };
 // get all users tasklist
@@ -440,7 +441,7 @@ export const BE_deleteTask = async (
   const deletedTask = await getDoc(taskRef);
   if (!deletedTask.exists()) {
     if (setLoading) setLoading(false);
-    //dispatch (deletedTask)
+    // dispatch (deletedTask)
   }
 };
 // add task or taskcompo in a singleTaskList
@@ -482,16 +483,17 @@ export const BE_saveTask = async (
   setLoading: setLoadingTypes
 ) => {
   setLoading(true);
-  const { id } = data;
+  const { id, title, description } = data;
+  console.log("something   " + title);
   if (id) {
     const taskRef = doc(db, taskListColl, listid, tasksColl, id);
     // update the edited task in databse
-    await updateDoc(taskRef, data);
+    await updateDoc(taskRef, { title, description });
     const updatedtask = await getDoc(taskRef);
     if (updatedtask.exists()) {
       setLoading(false);
       // dispatch
-      dispatch(saveTask({ listid, ...updatedtask.data() }));
+      dispatch(saveTask({ listid, id: updatedtask.id, ...updatedtask.data() }));
     } else toastErr("BE_saveTask:updated task not found");
   } else toastErr("BE_saveTask: id not found");
 };
@@ -499,7 +501,7 @@ export const BE_saveTask = async (
 export const getTasksForTaskList = async (
   dispatch: AppDispatch,
   listid: string,
-  data: TaskType,
+  // data: TaskType,
   setLoading: setLoadingTypes
 ) => {
   setLoading(true);
@@ -521,6 +523,7 @@ export const getTasksForTaskList = async (
       });
     });
   }
+  
   dispatch(setTaskListTasks({ listid, tasks }));
   setLoading(false);
 };

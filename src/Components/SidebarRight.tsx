@@ -23,7 +23,7 @@ function SidebarRight() {
               <img
                 src={currentSelectedChat.img}
                 alt={currentSelectedChat.username}
-                className="w-32 h-32 md:w-48 md:h-48 rounded-full p-{2px} ring-2 ring-gray-300
+                className="w-20 h-20 md:w-48 md:h-48 rounded-full p-{2px} ring-2 ring-gray-300
       cursor-pointer hover:shadow-lg"
               />
               <span

@@ -41,10 +41,10 @@ const SingleTaskList = forwardRef(
     const [allCollapse, setAllCollapse] = useState(false);
     const dispatch = useDispatch<AppDispatch>();
 
-    // useEffect(() => {
-    //   //get task here
-    //   if (id ) getTasksForTaskList(dispatch, id, setTasksLoading);
-    // }, [dispatch, id]);
+    useEffect(() => {
+      //get task here
+      if (id) getTasksForTaskList(dispatch, id, setTasksLoading);
+    }, [dispatch, id]);
 
     useEffect(() => {
       const checkAllCollapse = () => {
@@ -68,7 +68,7 @@ const SingleTaskList = forwardRef(
       }
     };
     const handleDelete = () => {
-      if (id && tasks) BE_deleteTaskList (id, tasks, dispatch, setDeleteLoading);
+      if (id && tasks) BE_deleteTaskList(id, tasks, dispatch, setDeleteLoading);
     };
     const handleAddTask = () => {
       if (id) BE_addTask(dispatch, id, setAddTaskLoading);

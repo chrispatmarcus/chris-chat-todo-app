@@ -4,7 +4,7 @@ import { MdDelete, MdEdit, MdSave } from "react-icons/md";
 import { TaskType } from "../utills/Types";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../Redux/store";
-import { collapeTask, taskListSwitchEditMode } from "../Redux/taskListSlice";
+import { collapeTask, taskListSwitchEditMode, taskSwitchEditMode } from "../Redux/taskListSlice";
 import { BE_deleteTask, BE_saveTask } from "../Backend/Queries";
 type taskType = {
   task: TaskType;
@@ -28,6 +28,7 @@ const TaskSingle = forwardRef(
       };
       //save function
       BE_saveTask(dispatch, listid, taskData, setSaveLoading);
+      
     };
     const handleDelete = () => {
       if (id) BE_deleteTask(listid, id, dispatch, setDeleteLoading);
@@ -74,12 +75,12 @@ const TaskSingle = forwardRef(
                   onClick={() =>
                     editMode
                       ? handleSave()
-                      : dispatch(taskListSwitchEditMode({ listid, id }))
+                      : dispatch(taskSwitchEditMode({ listid, id }))
                   }
                   IconName={editMode ? MdSave : MdEdit}
                   loading={editMode && saveLoading}
                 />
-                <Icon onClick={handleDelete} IconName={MdDelete} />
+                <Icon onClick={handleDelete} IconName={MdDelete} loading={deleteLoading} />
               </div>
             </div>
           </div>
