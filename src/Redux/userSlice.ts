@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { userType } from "../utills/Types";
 
-export const userStorageName = "superhero_user";
+export const userStorageName = "__user";
 
 export const defaultUser: userType = {
   id: "",
@@ -15,9 +15,9 @@ export const defaultUser: userType = {
 };
 type userStateType = {
   users: userType[];
-  currenUser: userType;
+  currenUser: userType | null;
   alertProps: {
-    open:boolean
+    open: boolean;
     recieverId: string;
     recieverName: string;
   };
@@ -25,9 +25,9 @@ type userStateType = {
 
 const initialState: userStateType = {
   users: [],
-  currenUser: defaultUser,
+  currenUser: null,
   alertProps: {
-    open:false,
+    open: false,
     recieverId: "",
     recieverName: "",
   },
@@ -50,13 +50,13 @@ const userSlice = createSlice({
       state.users = action.payload;
     },
     setAlertProps: (state, action) => {
-      const {open, recieverId, recieverName} = action.payload
+      const { open, recieverId, recieverName } = action.payload;
 
       state.alertProps = {
         open,
         recieverId,
-        recieverName
-      }
+        recieverName,
+      };
     },
   },
 });

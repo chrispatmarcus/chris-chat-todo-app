@@ -6,7 +6,7 @@ import { AppDispatch, RootState } from "../Redux/store";
 import { generate } from "random-words";
 import AvatarGenerator from "../utills/avatarGenerator";
 import { toastErr, toastWarn } from "../utills/toast";
-import {  BE_saveProfile } from "../Backend/Queries";
+import { BE_saveProfile } from "../Backend/Queries";
 function ProfilePage() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
@@ -22,8 +22,8 @@ function ProfilePage() {
 
   // set the defualt email input and username to the user current information
   useEffect(() => {
-    setEmail(currentUser.email);
-    setUsername(currentUser.username);
+    setEmail(currentUser?.email || "");
+    setUsername(currentUser?.username || "");
   }, [currentUser]);
 
   const handleAvatarGeneration = () => {
@@ -43,28 +43,28 @@ function ProfilePage() {
 
     // only update email if it was changed
     let temp_email = email;
-    if (temp_email === currentUser.email) temp_email = "";
+    if (temp_email === currentUser?.email) temp_email = "";
 
     //only update username if it was changed
     let temp_username = username;
-    if (temp_username === currentUser.username) temp_username = "";
+    if (temp_username === currentUser?.username) temp_username = "";
 
     // only update avatar if it was changed
     let temp_avatar = avatar;
-    if (temp_avatar === currentUser.img) temp_avatar = "";
+    if (temp_avatar === currentUser?.img) temp_avatar = "";
 
     if (temp_email || temp_username || temp_password || temp_avatar) {
       // save profile
-       await BE_saveProfile(
-         dispatch,
-         {
-           email: temp_username,
-           username: temp_username,
-           password: temp_password,
-           img: temp_avatar,
-         },
+      await BE_saveProfile(
+        dispatch,
+        {
+          email: temp_username,
+          username: temp_username,
+          password: temp_password,
+          img: temp_avatar,
+        }
         //  setSaveProfileLoading
-       );
+      );
     } else toastWarn("change details before saving!");
   };
 
@@ -75,8 +75,8 @@ function ProfilePage() {
     >
       <div className="relative self-center" onClick={handleAvatarGeneration}>
         <img
-          src={avatar || currentUser.img}
-          alt={currentUser.username}
+          src={avatar || currentUser?.img}
+          alt={currentUser?.username}
           className="w-32 h-32 md:w-48 md:h-48 rounded-full p-{2px} ring-2 ring-gray-300
       cursor-pointer hover:shadow-lg"
         />

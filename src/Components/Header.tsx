@@ -18,9 +18,9 @@ function Header() {
   const dispatch = useDispatch();
   // useselector to select state variables
   const currentUser = useSelector((state: RootState) => state.user.currenUser);
-    const hasNewMessage= useSelector(
-      (state: RootState) => state.chat.hasNewMessage
-    );
+  const hasNewMessage = useSelector(
+    (state: RootState) => state.chat.hasNewMessage
+  );
 
   const usr = getStorageUser();
 
@@ -103,7 +103,9 @@ function Header() {
         )}
 
         <div className="group">
-          <UserHeaderProfile user={currentUser} lastmsg="true" />
+          {currentUser && (
+            <UserHeaderProfile user={currentUser} lastmsg="true" />
+          )}
           <div className="absolute pt-5 hidden group-hover:block w-full min-w-max">
             <ul className="w-full bg-white overflow-hidden rounded-md shadow-md text-gray-700 pt-1">
               <p
